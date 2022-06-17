@@ -1,3 +1,5 @@
+![Screenshot](images/logo.png)
+
 # GooFuzz - The Power of Google Dorks
 
 ###### Author: M3n0sD0n4ld
