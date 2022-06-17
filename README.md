@@ -19,5 +19,5 @@ $ chmod +x GooFuzz
 # Use:
 
 ## Menu
-![Screenshot](images/1.png)
+![Screenshot](https://github.com/m3n0sd0n4ld/GooFuzz/blob/main/images/1.png)
 
