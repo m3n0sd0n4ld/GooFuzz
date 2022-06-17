@@ -9,3 +9,15 @@
 # Description:
 
 **GooFuzz** is a script written in *Bash Scripting* that uses advanced Google search techniques to obtain sensitive information in files or directories without making requests to the web server.
+
+# Download and install:
+```
+$ git clone https://github.com/m3n0sd0n4ld/GooFuzz
+$ cd GooFuzz
+$ chmod +x GooFuzz
+
+# Use:
+
+## Menu
+![Screenshot](images/1.png)
+
