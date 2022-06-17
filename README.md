@@ -15,9 +15,10 @@
 $ git clone https://github.com/m3n0sd0n4ld/GooFuzz
 $ cd GooFuzz
 $ chmod +x GooFuzz
+```
 
 # Use:
 
 ## Menu
-![Screenshot](https://github.com/m3n0sd0n4ld/GooFuzz/blob/main/images/1.png)
+![Screenshot](images/1.png)
 
