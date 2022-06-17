@@ -1,4 +1,4 @@
-![Screenshot](images/logo.png)
+![Screenshot](images/goofuzz.png)
 
 # GooFuzz - The Power of Google Dorks
 
