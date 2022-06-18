@@ -19,6 +19,7 @@
 $ git clone https://github.com/m3n0sd0n4ld/GooFuzz
 $ cd GooFuzz
 $ chmod +x GooFuzz
+$ ./GooFuzz -h
 ```
 
 # Use:
@@ -35,5 +36,8 @@ $ chmod +x GooFuzz
 ## Lists files by extension, either subdomain or domain and showing the first Google result.
 ![Screenshot](images/4.png)
 
-## List files, directories and even parameters by means of a wordlist (it is recommended to use only very small files)..
+## List files, directories and even parameters by means of a wordlist (it is recommended to use only very small files).
 ![Screenshot](images/5.png)
+
+## Lists directories and files by specifying paths, words or file names.
+![Screenshot](images/7.png)
