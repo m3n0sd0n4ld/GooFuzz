@@ -14,13 +14,6 @@
   </a>
     <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/master">
     <img src="https://img.shields.io/github/last-commit/m3n0sd0n4ld/GooFuzz?style=flat-square">
-  </a>
-    <a href="">
-    <img src="https://img.shields.io/github/stars/m3n0sd0n4ld/GooFuzz?style=flat-square">
-  </a>
-    <a href="">
-    <img src="https://img.shields.io/github/forks/m3n0sd0n4ld/GooFuzz?style=flat-square">
-  </a>
   <a href="">
     <img src="https://img.shields.io/twitter/follow/David_Uton?style=flat-square">
   </a>
