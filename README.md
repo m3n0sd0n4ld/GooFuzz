@@ -48,3 +48,14 @@ $ ./GooFuzz -h
 - All the information obtained is public and through Google results. 
 - Logically, the searches are in Google, so it leaves no evidence in the logs of the target's server.
 - And very important, if you see a file, directory, subdomain, etcetera... Indexed in Google, does not mean that it still exists on the server (or it does ;)).
+
+# Useful?
+If you like the tool, find it useful in your work, Bug Bounty or as a hobby, you could help me like this:
+- Tell your friends and co-workers about it.
+- Contribute new ideas or help me to improve it by correcting bugs from [**here**](https://github.com/m3n0sd0n4ld/GooFuzz/issues).
+- How? Do you want to buy me a coffee? Thank you very much! 
+
+<p align="left">
+  <a href="https://www.paypal.com/paypalme/elmalodebatman" target="_blank">
+    <img src="images/paypal.png"></img></a>
+</p>
