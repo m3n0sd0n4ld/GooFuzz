@@ -64,7 +64,7 @@ $ ./GooFuzz -h
 - Google Search has mechanisms to prevent abusive use or detection of suspicious activity. If at any time the tool does not show results, Google has temporarily blocked you (e.g. Captcha).
 - All the information obtained is public and through Google results. 
 - Logically, the searches are in Google, so it leaves no evidence in the logs of the target's server.
-- And very important, if you see a file, directory, subdomain, etcetera... Indexed in Google, does not mean that it still exists on the server (or it does ;)).
+- And very important, if you see a file, directory, subdomain, etc... Indexed in Google, does not mean that it still exists on the server (or it does ;)).
 
 # Useful?
 If you like the tool, find it useful in your work, Bug Bounty or as a hobby, you could help me like this:
