@@ -2,13 +2,34 @@
   <img width="460" height="300" src="images/goofuzz.png">
 </p>
 
-# GooFuzz - The Power of Google Dorks
+<p align="center">
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/releases">
+    <img src="https://img.shields.io/github/v/release/m3n0sd0n4ld/GooFuzz?include_prereleases">
+  </a>
+  <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">
+    <img src="https://img.shields.io/github/license/m3n0sd0n4ld/GooFuzz">
+  </a>
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/issues?q=is%3Aissue+is%3Aclosed">
+    <img src="https://img.shields.io/github/issues-closed/m3n0sd0n4ld/GooFuzz">
+  </a>
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/master">
+    <img src="https://img.shields.io/github/last-commit/m3n0sd0n4ld/GooFuzz">
+  </a>
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/master">
+    <img src="https://img.shields.io/github/languages/code-size/m3n0sd0n4ld/GooFuzz">
+  </a>
+  <a href="">
+    <img src="https://img.shields.io/twitter/follow/David_Uton?style=social">
+  </a>
+  <br>
+  <h1 align="center">GooFuzz - The Power of Google Dorks</h1>
+  <br>
+</p>
+
+## Credits
 
 ###### Author: M3n0sD0n4ld
 ###### Twitter: [@David_Uton](https://twitter.com/David_Uton)
-
-## News
-### 11/06/2022
 
 # Description:
 
