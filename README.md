@@ -3,23 +3,26 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/releases">
-    <img src="https://img.shields.io/github/v/release/m3n0sd0n4ld/GooFuzz?include_prereleases">
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/releases/tag/1.0">
+    <img src="https://img.shields.io/github/v/release/m3n0sd0n4ld/GooFuzz?include_prereleases&style=flat-square">
   </a>
   <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">
-    <img src="https://img.shields.io/github/license/m3n0sd0n4ld/GooFuzz">
+    <img src="https://img.shields.io/github/license/m3n0sd0n4ld/GooFuzz?style=flat-square">
   </a>
   <a href="https://github.com/m3n0sd0n4ld/GooFuzz/issues?q=is%3Aissue+is%3Aclosed">
-    <img src="https://img.shields.io/github/issues-closed/m3n0sd0n4ld/GooFuzz">
+    <img src="https://img.shields.io/github/issues/m3n0sd0n4ld/GooFuzz?style=flat-square">
   </a>
-  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/main">
-    <img src="https://img.shields.io/github/last-commit/m3n0sd0n4ld/GooFuzz">
+    <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/master">
+    <img src="https://img.shields.io/github/last-commit/m3n0sd0n4ld/GooFuzz?style=flat-square">
   </a>
-  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/main">
-    <img src="https://img.shields.io/github/languages/code-size/m3n0sd0n4ld/GooFuzz">
+    <a href="">
+    <img src="https://img.shields.io/github/stars/m3n0sd0n4ld/GooFuzz?style=flat-square">
+  </a>
+    <a href="">
+    <img src="https://img.shields.io/github/forks/m3n0sd0n4ld/GooFuzz?style=flat-square">
   </a>
   <a href="">
-    <img src="https://img.shields.io/twitter/follow/David_Uton?style=social">
+    <img src="https://img.shields.io/twitter/follow/David_Uton?style=flat-square">
   </a>
   <br>
   <h1 align="center">GooFuzz - The Power of Google Dorks</h1>
