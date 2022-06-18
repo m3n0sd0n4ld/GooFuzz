@@ -1,4 +1,6 @@
-![Screenshot](images/goofuzz.png)
+<p align="center">
+  <img width="460" height="300" src="images/goofuzz.png">
+</p>
 
 # GooFuzz - The Power of Google Dorks
 
