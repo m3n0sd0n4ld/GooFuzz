@@ -26,3 +26,5 @@ $ chmod +x GooFuzz
 ## Menu
 ![Screenshot](images/1.png)
 
+## Lists files by extensions separated by commas.
+![Screenshot](images/2.png)
