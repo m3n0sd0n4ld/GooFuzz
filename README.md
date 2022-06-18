@@ -34,3 +34,6 @@ $ chmod +x GooFuzz
 
 ## Lists files by extension, either subdomain or domain and showing the first Google result.
 ![Screenshot](images/4.png)
+
+## List files, directories and even parameters by means of a wordlist (it is recommended to use only very small files)..
+![Screenshot](images/5.png)
