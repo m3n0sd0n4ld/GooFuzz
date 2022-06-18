@@ -41,3 +41,10 @@ $ ./GooFuzz -h
 
 ## Lists directories and files by specifying paths, words or file names.
 ![Screenshot](images/7.png)
+
+# Disclaimer
+- I am not responsible for the misuse of the tool.
+- Google Search has mechanisms to prevent abusive use or detection of suspicious activity. If at any time the tool does not show results, Google has temporarily blocked you (e.g. Captcha).
+- All the information obtained is public and through Google results. 
+- Logically, the searches are in Google, so it leaves no evidence in the logs of the target's server.
+- And very important, if you see a file, directory, subdomain, etcetera... Indexed in Google, does not mean that it still exists on the server (or it does ;)).
