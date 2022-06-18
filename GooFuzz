@@ -1,0 +1,295 @@
+#!/bin/bash
+
+# Variables
+## General
+url="https://www.google.com/search?q="
+filter="&filter=0"
+start="&start="
+userAgent="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0"
+version="1.0"
+
+## Colors
+cRojo=`tput setaf 1`
+cVerde=`tput setaf 2`
+cAmarillo=`tput setaf 3`
+cAzul=`tput setaf 4`
+
+## Effects
+cBold=`tput bold`
+cNormal=`tput sgr0` #No color, No bold
+
+# Functions
+## Usage
+function usage {
+       echo -e "\nUsage:
+	-h                               Display this help message.
+	-w <DICTIONARY>                       Specify a DICTIONARY.
+	-e <EXTENSION>          Specify comma-separated extensions.
+	-t <TARGET>                 Specify a DOMAIN or IP Address.
+	-p <PAGES>                     Specify the number of PAGES.
+	   
+Examples:
+   	GooFuzz -t site.com -e pdf,doc,bak
+	GooFuzz -t site.com -e pdf -p 2
+	GooFuzz -t www.site.com -e extensionslist.txt
+	GooFuzz -t www.site.com -w config.php,admin,/images/
+	GooFuzz -t site.com -w wp-admin -p 1
+	GooFuzz -t site.com -w wordlist.txt"
+       exit 0
+}
+
+## Checking parameters
+function parametersCheck(){
+	if [[ ${OPTARG} =~ ^- ]]; then
+		showError
+	fi
+}
+
+## Show Banner
+function showBanner(){
+	echo -e "*********************************************************
+* GooFuzz ${version} - The power of Google Dorks		*
+*********************************************************"
+}
+
+## Show Full Banner
+function showFullBanner(){
+	echo -e "*********************************************************
+* GooFuzz ${version} - The power of Google Dorks		*
+*							*
+* David Utón (@David_Uton) 				*
+*							*
+*********************************************************"
+}
+
+## Show errors
+function showError(){
+	echo -e "Error, missing or invalid argument."
+	usage
+}
+
+## Show not found
+function notFound(){
+	if [ -n "$extension" ]; then
+		echo -e "\nSorry, no results found for ${cBold}${extension}${cNormal}."
+	elif [ -n "$dictionary" ]; then
+		echo -e "\nSorry, no results found for ${cBold}${file}${cNormal}."
+	fi
+}
+
+## Request
+function requestRun(){
+	# Reset variables
+	requestStorage=""
+	page=0
+		
+	# Checking pages value
+	if [[ -z $pages ]]; then
+		pages=1
+	fi
+	
+	for page in {0..100..10}; do
+	
+		let pageShow=$pages*10
+		
+		if [[ $page -eq $pageShow ]]; then
+			break
+		fi
+		
+		if [ -n "$extension" ]; then
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype%3A${extension}${filter}${start}${page}" | grep -oP "http.?://\S+(.${extension})" | grep -vE "google" | sort -u | sed 's/"//g')
+		elif [ -n "$dictionary" ]; then
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl%3A${file}${filter}${start}${page}" | grep -oP "http.?://\S+(${file})" | sort -u | grep -vE "google|gstatic.com" | sort -u | sed 's/"//g')
+		fi
+
+		# Request storage
+		requestStorage="$requestStorage
+$request"
+		# Pages Incremental
+		((page++))
+
+	done
+	}
+
+## GooFuzz Dictionary Attack
+function dictionaryAttack(){
+	echo -e "\nTarget: ${cBold}${target}${cNormal}"
+
+	# Checking file exist
+	if [ -f "$dictionary" ]; then
+		
+		# Count lines
+		totalRequests=$(wc -l "${dictionary}" | awk '{printf $1}')
+		echo -e "Dictionary: ${cBold}${dictionary}${cNormal}"
+		echo -e "Total requests: ${totalRequests}"
+	
+		for file in $(cat "$dictionary"); do
+			# Send request
+			requestRun
+		
+			# Show information
+			if [ -n "$request" ]; then
+			echo -e "\n==================================================================="				
+			echo -e "Directories/Files: ${cBold}${file}${cNormal}"
+			echo -e "==================================================================="
+			echo "$requestStorage"
+			else
+				notFound
+			fi
+		done
+		
+		# Close script
+		exit 1
+		
+	elif [[ "$dictionary" =~ "," ]]; then
+		filesList=$(echo "$dictionary" | sed 's/,/ /g')
+		
+		for file in $filesList; do
+			# Send request
+			requestRun
+				
+			# Show information
+			if [ -n "$request" ]; then
+				echo -e "\n==================================================================="
+				echo -e "Directories/Files: ${cBold}${file}${cNormal}"
+				echo -e "==================================================================="
+				echo "$requestStorage"
+			else
+				notFound
+			fi
+		done
+		
+		# Close script
+		exit 1
+			
+	else
+		# Send request
+		file="$dictionary"
+		requestRun
+
+		# Show information
+		if [ -n "$request" ]; then
+			echo -e "\n==================================================================="
+			echo -e "Directories/Files: ${cBold}${file}${cNormal}"
+			echo -e "==================================================================="
+			echo "$requestStorage"
+		else
+			notFound
+		fi
+	fi
+}
+
+## GooFuzz Extension Attack
+function extensionAttack(){
+	echo -e "\nTarget: ${cBold}${target}${cNormal}"
+
+	# Checking file exist
+	if [ -f "$extension" ]; then
+	
+		# Count lines
+		totalRequests=$(wc -l "${extension}" | awk '{printf $1}')
+		echo -e "Total requests: ${totalRequests}"
+		
+		for extension in $(cat "$extension"); do
+			# Send request
+			requestRun
+			
+			# Show information
+			if [ -n "$request" ]; then
+				echo -e "\n==================================================================="
+				echo -e "Extension: ${cBold}${extension}${cNormal}"
+				echo -e "==================================================================="
+				echo "$requestStorage"
+			else
+				notFound
+			fi
+		done
+		
+		# Close script
+		exit 1
+	
+	# Checking various extensions
+	elif [[ "$extension" =~ "," ]]; then
+		extensionsList=$(echo "$extension" | sed 's/,/ /g')
+		
+		for extension in $extensionsList; do
+			# Send request
+			requestRun
+			
+			# Show information
+			if [ -n "$request" ]; then
+				echo -e "\n==================================================================="
+				echo -e "Extension: ${cBold}${extension}${cNormal}"
+				echo -e "==================================================================="
+				echo "$requestStorage"
+			else
+				notFound
+			fi
+		done
+		
+		# Close script
+		exit 1
+	
+	else
+	
+		# Send request
+		requestRun
+
+		# Show information
+		if [ -n "$request" ]; then
+			echo -e "\n==================================================================="
+			echo -e "Extension: ${cBold}${extension}${cNormal}"
+			echo -e "==================================================================="
+			echo "$requestStorage"
+		else
+			notFound
+		fi
+	fi
+}
+
+# Script execute
+
+## Options
+
+while getopts :p:w:e:t:h option; do
+	case ${option} in
+		h)
+			showFullBanner
+			usage
+			break
+			exit 1
+		;;
+		p)
+			parametersCheck
+			pages=${OPTARG}
+		;;
+		w)
+			parametersCheck
+			dictionary=${OPTARG}
+		;;
+		e)
+			parametersCheck
+			extension=${OPTARG}
+		;;
+		t)
+			parametersCheck
+			target=${OPTARG}
+		;;
+		*)
+			showFullBanner
+			showError
+		;;
+	esac
+done
+
+## Continue
+showBanner
+
+if [ -n "$target" ] && [ -n "$dictionary" ]; then 
+	dictionaryAttack
+	
+elif [ -n "$target" ] && [ -n "$extension" ]; then
+	extensionAttack
+else
+	showError
+fi
