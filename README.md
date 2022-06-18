@@ -31,3 +31,6 @@ $ chmod +x GooFuzz
 
 ## Lists files by extensions contained in a txt file.
 ![Screenshot](images/3.png)
+
+## Lists files by extension, either subdomain or domain and showing the first Google result.
+![Screenshot](images/4.png)
