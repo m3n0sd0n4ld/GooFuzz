@@ -1,0 +1,11 @@
+id
+config.php
+user
+db.php
+db.txt
+db.html
+password
+login
+adminpanel
+intranet
+index
