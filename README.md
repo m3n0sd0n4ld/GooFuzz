@@ -12,10 +12,10 @@
   <a href="https://github.com/m3n0sd0n4ld/GooFuzz/issues?q=is%3Aissue+is%3Aclosed">
     <img src="https://img.shields.io/github/issues-closed/m3n0sd0n4ld/GooFuzz">
   </a>
-  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/master">
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/main">
     <img src="https://img.shields.io/github/last-commit/m3n0sd0n4ld/GooFuzz">
   </a>
-  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/master">
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/main">
     <img src="https://img.shields.io/github/languages/code-size/m3n0sd0n4ld/GooFuzz">
   </a>
   <a href="">
