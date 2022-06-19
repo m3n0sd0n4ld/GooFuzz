@@ -33,7 +33,7 @@
 
 # Download and install:
 ```
-$ git clone https://github.com/m3n0sd0n4ld/GooFuzz
+$ git clone https://github.com/m3n0sd0n4ld/GooFuzz.git
 $ cd GooFuzz
 $ chmod +x GooFuzz
 $ ./GooFuzz -h
