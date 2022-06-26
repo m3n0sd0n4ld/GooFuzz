@@ -9,10 +9,9 @@
   <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">
     <img src="https://img.shields.io/github/license/m3n0sd0n4ld/GooFuzz?style=flat-square">
   </a>
-  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/issues?q=is%3Aissue+is%3Aclosed">
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/issues?q=is%3Aissue+is%3Aopen">
     <img src="https://img.shields.io/github/issues/m3n0sd0n4ld/GooFuzz?style=flat-square">
-  </a>
-    <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/master">
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/commits/master">
     <img src="https://img.shields.io/github/last-commit/m3n0sd0n4ld/GooFuzz?style=flat-square">
   <a href="">
     <img src="https://img.shields.io/twitter/follow/David_Uton?style=flat-square">
