@@ -58,6 +58,22 @@ $ ./GooFuzz -h
 
 ## Lists directories and files by specifying paths, words or file names.
 ![Screenshot](images/7.png)
+  
+## Exclusion of subdomains in your searches (separated by commas or by a list)
+### Example 1:
+In this example we remove the subdomain "*mars.nasa.gov*" from the search.
+
+![Screenshot](images/8.png)
+
+### Example 2:
+We perform a normal file search by three extensions and locate subdomains that we want to exclude.
+
+![Screenshot](images/9.png)
+
+We create a file called "*exclusion_list.txt*" and insert the three subdomains to exclude, we perform the same search again, but passing the list of excluded targets. 
+  
+![Screenshot](images/10.png)
+ 
 
 # Disclaimer
 - I am not responsible for the misuse of the tool.
