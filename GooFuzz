@@ -6,13 +6,7 @@ url="https://www.google.com/search?q="
 filter="&filter=0"
 start="&start="
 userAgent="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0"
-version="1.0"
-
-## Colors
-cRojo=`tput setaf 1`
-cVerde=`tput setaf 2`
-cAmarillo=`tput setaf 3`
-cAzul=`tput setaf 4`
+version="1.1"
 
 ## Effects
 cBold=`tput bold`
@@ -23,10 +17,11 @@ cNormal=`tput sgr0` #No color, No bold
 function usage {
        echo -e "\nUsage:
 	-h                               Display this help message.
-	-w <DICTIONARY>                       Specify a DICTIONARY.
+	-w <DICTIONARY>       Specify a DICTIONARY, PATHS or FILES.
 	-e <EXTENSION>          Specify comma-separated extensions.
 	-t <TARGET>                 Specify a DOMAIN or IP Address.
 	-p <PAGES>                     Specify the number of PAGES.
+	-x <EXCLUSIONS>               EXCLUDES targets in searches.
 	   
 Examples:
    	GooFuzz -t site.com -e pdf,doc,bak
@@ -34,7 +29,9 @@ Examples:
 	GooFuzz -t www.site.com -e extensionslist.txt
 	GooFuzz -t www.site.com -w config.php,admin,/images/
 	GooFuzz -t site.com -w wp-admin -p 1
-	GooFuzz -t site.com -w wordlist.txt"
+	GooFuzz -t site.com -w wordlist.txt
+	GooFuzz -t site.com -w login.html -x dev.site.com
+	GooFuzz -t site.com -w admin.html -x exclusion_list.txt"
        exit 0
 }
 
@@ -77,6 +74,47 @@ function notFound(){
 	fi
 }
 
+# Exit GooFuzz
+trap ctrl_c INT
+
+function ctrl_c(){
+	echo -e "\n${cBold}[!]${cNormal} Exiting GooFuzz..."
+	exit 1
+}
+
+## Exclusions
+function exclusionsCheck(){
+	# Needs variables
+	excludeTargets="-site:"
+
+	# Checking file exist
+	if [ -f "$exclusions" ]; then
+		for exclusion in $(cat "$exclusions"); do
+			if [[ $multi -eq 1 ]]; then
+				exclusion="+-${exclusion}"
+			fi
+
+			excludeTargets="$excludeTargets${exclusion}"
+			multi=1 # On multi-liner
+		done
+
+	elif [[ "$exclusions" =~ "," ]]; then
+		excludeTargetsList=$(echo "$exclusions" | sed 's/,/ /g')
+
+		for exclusion in $excludeTargetsList; do
+			if [[ $multi -eq 1 ]]; then
+				exclusion="+-${exclusion}"
+			fi
+
+			excludeTargets="$excludeTargets${exclusion}"
+			multi=1 # On multi-liner
+		done
+			
+	else
+		excludeTargets="${excludeTargets}${exclusions}"
+	fi
+}
+
 ## Request
 function requestRun(){
 	# Reset variables
@@ -97,9 +135,9 @@ function requestRun(){
 		fi
 		
 		if [ -n "$extension" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype%3A${extension}${filter}${start}${page}" | grep -oP "http.?://\S+(.${extension})" | grep -vE "google" | sort -u | sed 's/"//g')
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${excludeTargets}${filter}${start}${page}" | grep -oP "http.?://\S+(.${extension})" | grep -vE "google" | sort -u | sed 's/"//g')
 		elif [ -n "$dictionary" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl%3A${file}${filter}${start}${page}" | grep -oP "http.?://\S+(${file})" | sort -u | grep -vE "google|gstatic.com" | sort -u | sed 's/"//g')
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl:${file}+${excludeTargets}${filter}${start}${page}" | grep -oP "http.?://\S+(${file})" | sort -u | grep -vE "google|gstatic.com" | sort -u | sed 's/"//g')
 		fi
 
 		# Request storage
@@ -251,7 +289,7 @@ function extensionAttack(){
 
 ## Options
 
-while getopts :p:w:e:t:h option; do
+while getopts :p:x:w:e:t:h option; do
 	case ${option} in
 		h)
 			showFullBanner
@@ -262,6 +300,11 @@ while getopts :p:w:e:t:h option; do
 		p)
 			parametersCheck
 			pages=${OPTARG}
+		;;
+		x)
+			parametersCheck
+			exclusions=${OPTARG}
+			exclusionsCheck
 		;;
 		w)
 			parametersCheck
