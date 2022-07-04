@@ -6,7 +6,7 @@ url="https://www.google.com/search?q="
 filter="&filter=0"
 start="&start="
 userAgent="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0"
-version="1.1"
+version="1.2"
 
 ## Effects
 cBold=`tput bold`
@@ -135,9 +135,9 @@ function requestRun(){
 		fi
 		
 		if [ -n "$extension" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${excludeTargets}${filter}${start}${page}" | grep -oP "http.?://\S+(.${extension})" | grep -vE "google" | sort -u | sed 's/"//g')
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${excludeTargets}${filter}${start}${page}" | grep -oP '<a href="(.*?)"' | grep -vE "search\?\q=site|google|#" |  grep -oP '"(.*?)"' | sort -u | sed 's/"//g')
 		elif [ -n "$dictionary" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl:${file}+${excludeTargets}${filter}${start}${page}" | grep -oP "http.?://\S+(${file})" | sort -u | grep -vE "google|gstatic.com" | sort -u | sed 's/"//g')
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl:${file}+${excludeTargets}${filter}${start}${page}" | grep -oP '<a href="(.*?)"' | grep -vE "search\?\q=site|google|#" |  grep -oP '"(.*?)"' | sort -u | sed 's/"//g')
 		fi
 
 		# Request storage
