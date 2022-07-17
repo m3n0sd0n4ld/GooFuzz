@@ -6,7 +6,7 @@ url="https://www.google.com/search?q="
 filter="&filter=0"
 start="&start="
 userAgent="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0"
-version="1.1.1"
+version="1.2"
 
 ## Effects
 cBold=`tput bold`
@@ -45,14 +45,14 @@ function parametersCheck(){
 ## Show Banner
 function showBanner(){
 	echo -e "*********************************************************
-* GooFuzz ${version} - The power of Google Dorks		*
+* GooFuzz ${version} - The Power of Google Dorks		*
 *********************************************************"
 }
 
 ## Show Full Banner
 function showFullBanner(){
 	echo -e "*********************************************************
-* GooFuzz ${version} - The power of Google Dorks		*
+* GooFuzz ${version} - The Power of Google Dorks		*
 *							*
 * David Utón (@David_Uton) 				*
 *							*
@@ -67,6 +67,10 @@ function showError(){
 
 ## Show not found
 function notFound(){
+	
+	# Checking temporal ban from Google
+	checkBan
+		
 	if [ -n "$extension" ]; then
 		echo -e "\nSorry, no results found for ${cBold}${extension}${cNormal}."
 	elif [ -n "$dictionary" ]; then
@@ -74,12 +78,23 @@ function notFound(){
 	fi
 }
 
-# Exit GooFuzz
+## Exit GooFuzz
 trap ctrl_c INT
 
 function ctrl_c(){
 	echo -e "\n${cBold}[!]${cNormal} Exiting GooFuzz..."
 	exit 1
+}
+
+## Google ban check
+function checkBan(){
+	
+	checkBanStatus=$(curl -s -H "$userAgent" "${url}site:${target}${filter}${start}${pageNum}")
+	
+	if [[ ${checkBanStatus} =~ "The document has moved" ]]; then
+		echo -e "\n${cBold}[!]${cNormal} Oops... Looks like Google has temporarily blocked your IP address."
+		exit 1
+	fi
 }
 
 ## Exclusions
@@ -115,6 +130,16 @@ function exclusionsCheck(){
 	fi
 }
 
+## Calculate sending requests
+function calcRequests(){
+	if [[ -z $pages ]] || [[ $pages -eq 0 ]]; then
+		return $totalRequests
+	else
+		let totalRequests=$totalRequests*$pages
+		return $totalRequests
+	fi
+}
+
 ## Request
 function requestRun(){
 	# Reset variables
@@ -122,33 +147,29 @@ function requestRun(){
 	page=0
 		
 	# Checking pages value
-	if [[ -z $pages ]]; then
+	if [[ -z $pages ]] || [[ $pages -eq 0 ]]; then
 		pages=1
 	fi
 	
-	for page in {0..100..10}; do
+	until [[ $page -eq $pages ]]; do
+		let pageNum=$page*10
 	
-		let pageShow=$pages*10
-		
-		if [[ $page -eq $pageShow ]]; then
-			break
-		fi
-		
 		if [ -n "$extension" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${excludeTargets}${filter}${start}${page}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g')
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${excludeTargets}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g')
 
 		elif [ -n "$dictionary" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl:${file}+${excludeTargets}${filter}${start}${page}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g')
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl:${file}+${excludeTargets}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g')
 		fi
 
 		# Request storage
 		requestStorage="$requestStorage
 $request"
+	
 		# Pages Incremental
 		((page++))
 
 	done
-	}
+}
 
 ## GooFuzz Dictionary Attack
 function dictionaryAttack(){
@@ -159,6 +180,10 @@ function dictionaryAttack(){
 		
 		# Count lines
 		totalRequests=$(wc -l "${dictionary}" | awk '{printf $1}')
+		
+		# Calculate
+		calcRequests
+		
 		echo -e "Dictionary: ${cBold}${dictionary}${cNormal}"
 		echo -e "Total requests: ${totalRequests}"
 	
@@ -227,6 +252,10 @@ function extensionAttack(){
 	
 		# Count lines
 		totalRequests=$(wc -l "${extension}" | awk '{printf $1}')
+				
+		# Calculate
+		calcRequests
+		
 		echo -e "Total requests: ${totalRequests}"
 		
 		for extension in $(cat "$extension"); do
