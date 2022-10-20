@@ -3,10 +3,11 @@
 # Variables
 ## General
 url="https://www.google.com/search?q="
+urlByPass="https://developers.facebook.com/tools/debug/echo/?q=https://www.google.com/search?q="
 filter="&filter=0"
 start="&start="
 userAgent="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0"
-version="1.2"
+version="1.2.1"
 
 ## Effects
 cBold=`tput bold`
@@ -22,6 +23,10 @@ function usage {
 	-t <TARGET>                 Specify a DOMAIN or IP Address.
 	-p <PAGES>                     Specify the number of PAGES.
 	-x <EXCLUSIONS>               EXCLUDES targets in searches.
+	-d <DELAY>               Delay in seconds between requests.
+	-s                Lists subdomains of the specified domain.
+	-b <COOKIE_FILE>         Bypasses Google captcha [Optional]
+	                               (Requires Facebook cookies).
 	   
 Examples:
    	GooFuzz -t site.com -e pdf,doc,bak
@@ -31,7 +36,9 @@ Examples:
 	GooFuzz -t site.com -w wp-admin -p 1
 	GooFuzz -t site.com -w wordlist.txt
 	GooFuzz -t site.com -w login.html -x dev.site.com
-	GooFuzz -t site.com -w admin.html -x exclusion_list.txt"
+	GooFuzz -t site.com -w admin.html -x exclusion_list.txt
+	GooFuzz -t site.com -s -p 10 -d 5
+	GooFuzz -t site.com -b cookiesfile.txt -w words-100.txt"
        exit 0
 }
 
@@ -75,6 +82,9 @@ function notFound(){
 		echo -e "\nSorry, no results found for ${cBold}${extension}${cNormal}."
 	elif [ -n "$dictionary" ]; then
 		echo -e "\nSorry, no results found for ${cBold}${file}${cNormal}."
+
+	elif [ -n "$subdomain" ]; then
+		echo -e "\nSorry, no subdomains found for ${cBold}${target}${cNormal}."
 	fi
 }
 
@@ -88,12 +98,21 @@ function ctrl_c(){
 
 ## Google ban check
 function checkBan(){
+	if [[ -z $cookies ]]; then
 	
-	checkBanStatus=$(curl -s -H "$userAgent" "${url}site:${target}${filter}${start}${pageNum}")
+		checkBanStatus=$(curl -s -H "$userAgent" "${url}site:${target}${filter}${start}${pageNum}")
 	
-	if [[ ${checkBanStatus} =~ "The document has moved" ]]; then
-		echo -e "\n${cBold}[!]${cNormal} Oops... Looks like Google has temporarily blocked your IP address."
-		exit 1
+		if [[ ${checkBanStatus} =~ "The document has moved" ]]; then
+			echo -e "\n${cBold}[!]${cNormal} Oops... Looks like Google has temporarily blocked your IP address."
+			exit 1
+		fi
+	else
+		checkBanStatus=$(curl -s -b "${cookies}" "${urlByPass}site:${target}%2520%26filter%3D0%26start%3D${pageNum}")
+
+		if [[ ${checkBanStatus} =~ " error " ]]; then
+			echo -e "\n${cBold}[!]${cNormal} You have exceeded the limit of requests allowed by Facebook, please try again in a few minutes."
+			exit 1
+		fi
 	fi
 }
 
@@ -140,6 +159,41 @@ function calcRequests(){
 	fi
 }
 
+## Delay Control
+function delayControl(){
+	# Checking
+	if [[ -n "$delay" ]]; then
+		sleep "$delay"s
+	else
+		sleep 0s
+	fi
+}
+
+## byPass Google Captcha
+function byPass(){
+	# Checking cookie files
+	fileCookiesCheck=$(file "$cookiesFile" | cut -d ' '  -f2)
+
+	if [[ ! -f "$cookiesFile" ]]; then
+		echo -e "\n${cBold}[!]${cNormal} The file does not exist."
+		exit 1
+
+	elif [[ "$fileCookiesCheck" != "ASCII" ]]; then
+		echo -e "\n${cBold}[!]${cNormal} This file is not in text format or is corrupted."
+		exit 1
+	else
+		fileContentCookies=$(grep -a "c_user=" $cookiesFile && grep -a "xs=" $cookiesFile)
+
+		if [[ $? != 0 ]]; then
+			echo -e "\n${cBold}[!]${cNormal} The file does not contain the required Facebook cookies 'c_user' and 'xs'."
+			exit 1
+		else
+			cookies=$(cat $cookiesFile) 
+		fi
+
+	fi
+}
+
 ## Request
 function requestRun(){
 	# Reset variables
@@ -153,12 +207,29 @@ function requestRun(){
 	
 	until [[ $page -eq $pages ]]; do
 		let pageNum=$page*10
-	
+
 		if [ -n "$extension" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${excludeTargets}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g')
+			if [[ -n "$cookies" ]]; then
+				excludeTargets=$(echo $excludeTargets | sed 's/\+/%2520/g')
+				request=$(curl -s -b "${cookies}" "${urlByPass}site:${target}%2520filetype:${extension}%2520${excludeTargets}%2520%26filter%3D0%26start%3D${pageNum}" | grep -Eo '\/url\?q=(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -viE "google" | cut -d '=' -f2 | sort -u | sed 's/%3F/\?/g' | sed 's/%3D/\=/g' | sed 's/%26/\&/g')
+			else
+				request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${excludeTargets}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g' | sed 's/\&amp;/\&/g')
+			fi
 
 		elif [ -n "$dictionary" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl:${file}+${excludeTargets}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g')
+			if [[ -n "$cookies" ]]; then
+				excludeTargets=$(echo $excludeTargets | sed 's/\+/%2520/g')
+				request=$(curl -s -b "${cookies}" "${urlByPass}site:${target}%2520inurl:${file}%2520${excludeTargets}%2520%26filter%3D0%26start%3D${pageNum}" | grep -Eo '\/url\?q=(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -viE "google" | cut -d '=' -f2 | sort -u | sed 's/%3F/\?/g' | sed 's/%3D/\=/g' | sed 's/%26/\&/g')
+			else
+				request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl:${file}+${excludeTargets}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g' | sed 's/\&amp;/\&/g')
+			fi
+		elif [ -n "$subdomain" ]; then
+			if [[ -n "$cookies" ]]; then
+				request=$(curl -s -b "${cookies}" "${urlByPass}site:%2A.${target}%2520-site:www.${target}%2520%26filter%3D0%26start%3D${pageNum}" | grep -Eo '\/url\?q=(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -viE "google" | cut -d '=' -f2 |  cut -d '/' -f3 | sort -u)
+			else
+				request=$(curl -s -H "$userAgent" "${url}site:*.${target}+-site:www.${target}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g' | cut -d '/' -f3 | sort -u)
+			fi
+
 		fi
 
 		# Request storage
@@ -167,6 +238,9 @@ $request"
 	
 		# Pages Incremental
 		((page++))
+
+		# Delay Control
+		delayControl
 
 	done
 }
@@ -315,11 +389,29 @@ function extensionAttack(){
 	fi
 }
 
+## GooFuzz Subdomains Attack
+function subdomainAttack(){
+	echo -e "\nTarget: ${cBold}${target}${cNormal}"
+
+	# Send request
+	requestRun
+
+	# Show information
+	if [ -n "$request" ]; then
+		echo -e "\n==================================================================="
+		echo -e "Subdomains found:"
+		echo -e "==================================================================="
+		echo "$requestStorage" | sort -u
+	else
+		notFound
+	fi
+}
+
 # Script execute
 
 ## Options
 
-while getopts :p:x:w:e:t:h option; do
+while getopts :p:x:d:b:w:e:t:sh option; do
 	case ${option} in
 		h)
 			showFullBanner
@@ -336,6 +428,16 @@ while getopts :p:x:w:e:t:h option; do
 			exclusions=${OPTARG}
 			exclusionsCheck
 		;;
+		d)
+			parametersCheck
+			delay=${OPTARG}
+		;;
+		b)
+			parametersCheck
+			cookiesFile=${OPTARG}
+			# Checking byPass
+			byPass
+		;;
 		w)
 			parametersCheck
 			dictionary=${OPTARG}
@@ -348,6 +450,10 @@ while getopts :p:x:w:e:t:h option; do
 			parametersCheck
 			target=${OPTARG}
 		;;
+		s)
+			parametersCheck
+			subdomain=on
+		;;
 		*)
 			showFullBanner
 			showError
@@ -358,11 +464,17 @@ done
 ## Continue
 showBanner
 
-if [ -n "$target" ] && [ -n "$dictionary" ]; then 
+if [ -n "$target" ] && [ -n "$dictionary" ] && [ -z "$subdomain" ]; then
 	dictionaryAttack
+	exit 1
 	
-elif [ -n "$target" ] && [ -n "$extension" ]; then
+elif [ -n "$target" ] && [ -n "$extension" ] && [ -z "$subdomain" ]; then
 	extensionAttack
+	exit 1
+
+elif [ -n "$target" ] && [ -n "$subdomain" ]; then
+	subdomainAttack
+	exit 1
 else
 	showError
 fi
