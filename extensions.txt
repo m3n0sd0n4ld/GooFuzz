@@ -1,6 +1,0 @@
-pdf
-xls
-doc
-txt
-sql
-bak
