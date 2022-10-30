@@ -73,13 +73,37 @@ We create a file called "*exclusion_list.txt*" and insert the three subdomains t
   
 ![Screenshot](images/10.png)
  
+## Subdomains enumeration
+The functionality to list subdomains (parameter "-s") and in conjunction with a number of between 10 and 20 pages (parameter "-p"), it is possible to obtain a large number of subdomains of the organization.
 
+![Screenshot](images/11.png)
+    
+## GooFuzz + Google Captcha evasion (**This is optional**)
+We have used the "-b" parameter, accompanied by a file containing cookies from a Facebook account and that allows us to launch the requests through a "developers.facebook.com" functionality and evading the temporary block.
+
+![Screenshot](images/12.png)
+
+### But where do these cookies come from? 
+We will have to access the Facebook messaging service with address https://www.messenger.com, we will authenticate and extract the cookies "c_user" and "xs", then we will create a file "cookies.txt" with the content and in this format "c_user=<C_USER_COOKIE>; xs=<XS_COOKIE>".
+
+![Screenshot](images/13.png)
+
+### But why do you need my Facebook cookies? Where's the "trick"?
+Before explaining what **GooFuzz** does underneath to perform evasion, let it be clear that this **functionality is optional** and does not affect the normal use of the tool, so if you have already used previous versions, you will not notice any change.
+    
+In the following image, a URL of "developers.facebook.com" is shown, where the tool is making a query to Google from a *native tool in Facebook Developer*, so the Google captcha does not affect in the same way as if you were doing it normally or from your web browser (Interesting, isn't it?). Of course, to use this Facebook Developer utility you have to be authenticated and that is where the use of cookies comes in.
+    
+Also add that the important thing is that while the Facebook session is not closed, cookies will remain valid, no matter how many computers with GooFuzz you are using it.
+
+![Screenshot](images/14.png)
+    
 # Disclaimer
 - I am not responsible for the misuse of the tool.
 - Google Search has mechanisms to prevent abusive use or detection of suspicious activity. If at any time the tool does not show results, Google has temporarily blocked you (e.g. Captcha).
 - All the information obtained is public and through Google results. 
 - Logically, the searches are in Google, so it leaves no evidence in the logs of the target's server.
 - And very important, if you see a file, directory, subdomain, etc... Indexed in Google, does not mean that it still exists on the server (or it does ;)).
+- I am not responsible for the loss of your Facebook account.
 
 # Useful?
 If you like the tool, find it useful in your work, Bug Bounty or as a hobby, you could help me like this:
