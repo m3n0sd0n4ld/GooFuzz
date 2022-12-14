@@ -84,7 +84,7 @@ We have used the "-b" parameter, accompanied by a file containing cookies from a
 ![Screenshot](images/12.png)
 
 ### But where do these cookies come from? 
-We will have to access the Facebook messaging service with address https://www.messenger.com, we will authenticate and extract the cookies "c_user" and "xs", then we will create a file "cookies.txt" with the content and in this format "c_user=<C_USER_COOKIE>; xs=<XS_COOKIE>".
+We will have to access the Facebook with address https://www.facebook.com, we will authenticate and extract the cookies "c_user" and "xs", then we will create a file "cookies.txt" with the content and in this format: c_user=C_USER_COOKIE; xs=XS_COOKIE
 
 ![Screenshot](images/13.png)
 
