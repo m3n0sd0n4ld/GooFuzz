@@ -79,6 +79,7 @@ The functionality to list subdomains (parameter "-s") and in conjunction with a 
 ![Screenshot](images/11.png)
     
 ## GooFuzz + Google Captcha evasion (**This is optional**)
+### Attention: 01/12/2023 - Actually not working, Facebook has fixed the vulnerability.
 We have used the "-b" parameter, accompanied by a file containing cookies from a Facebook account and that allows us to launch the requests through a "developers.facebook.com" functionality and evading the temporary block.
 
 ![Screenshot](images/12.png)
