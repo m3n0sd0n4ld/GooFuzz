@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/releases/tag/1.0">
+  <a href="https://github.com/m3n0sd0n4ld/GooFuzz/tags">
     <img src="https://img.shields.io/github/v/release/m3n0sd0n4ld/GooFuzz?include_prereleases&style=flat-square">
   </a>
   <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">
