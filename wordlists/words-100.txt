@@ -29,11 +29,11 @@ files
 forum
 help
 htm
-.html
+html
 image
 images
 img
-.inc
+inc
 inc
 include
 includes
@@ -53,8 +53,8 @@ member
 memberlist
 misc
 modules
-.mysql
-.mysql.txt
+mysql
+mysql.txt
 newreply
 news
 newthread
@@ -63,9 +63,9 @@ objects
 online
 page
 password
-.pdf
-.pgsql
-.pgsql.txt
+pdf
+pgsql
+pgsql.txt
 php
 plugins
 _private
