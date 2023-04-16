@@ -3,11 +3,10 @@
 # Variables
 ## General
 url="https://www.google.com/search?q="
-urlByPass="https://developers.facebook.com/tools/debug/echo/?q=https://www.google.com/search?q="
 filter="&filter=0"
 start="&start="
 userAgent="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0"
-version="1.2.1"
+version="1.2.2"
 
 ## Effects
 cBold=`tput bold`
@@ -17,16 +16,16 @@ cNormal=`tput sgr0` #No color, No bold
 ## Usage
 function usage {
        echo -e "\nUsage:
-	-h                               Display this help message.
-	-w <DICTIONARY>       Specify a DICTIONARY, PATHS or FILES.
-	-e <EXTENSION>          Specify comma-separated extensions.
-	-t <TARGET>                 Specify a DOMAIN or IP Address.
-	-p <PAGES>                     Specify the number of PAGES.
-	-x <EXCLUSIONS>               EXCLUDES targets in searches.
-	-d <DELAY>               Delay in seconds between requests.
-	-s                Lists subdomains of the specified domain.
-	-b <COOKIE_FILE>         Bypasses Google captcha [Optional]
-	                               (Requires Facebook cookies).
+	-h                                Display this help message.
+	-w <DICTIONARY>        Specify a DICTIONARY, PATHS or FILES.
+	-e <EXTENSION>           Specify comma-separated extensions.
+	-t <TARGET>                  Specify a DOMAIN or IP Address.
+	-p <PAGES>                      Specify the number of PAGES.
+	-x <EXCLUSIONS>                EXCLUDES targets in searches.
+	-d <DELAY>                Delay in seconds between requests.
+	-s                 Lists subdomains of the specified domain.
+	-c <TEXT> Specify relevant content in comma-separated files.
+	-o <FILENAME>   Export the results to a file (results only).
 	   
 Examples:
    	GooFuzz -t site.com -e pdf,doc,bak
@@ -37,8 +36,8 @@ Examples:
 	GooFuzz -t site.com -w wordlist.txt
 	GooFuzz -t site.com -w login.html -x dev.site.com
 	GooFuzz -t site.com -w admin.html -x exclusion_list.txt
-	GooFuzz -t site.com -s -p 10 -d 5
-	GooFuzz -t site.com -b cookiesfile.txt -w words-100.txt"
+	GooFuzz -t site.com -s -p 10 -d 5 -o GooFuzz-subdomains.txt
+	GooFuzz -t site.com -c P@ssw0rd!"
        exit 0
 }
 
@@ -62,13 +61,12 @@ function showFullBanner(){
 * GooFuzz ${version} - The Power of Google Dorks		*
 *							*
 * David Utón (@David_Uton) 				*
-*							*
 *********************************************************"
 }
 
 ## Show errors
 function showError(){
-	echo -e "Error, missing or invalid argument."
+	echo -e "\n${cBold}[!]${cNormal} Error, missing or invalid argument."
 	usage
 }
 
@@ -80,11 +78,22 @@ function notFound(){
 		
 	if [ -n "$extension" ]; then
 		echo -e "\nSorry, no results found for ${cBold}${extension}${cNormal}."
+
 	elif [ -n "$dictionary" ]; then
-		echo -e "\nSorry, no results found for ${cBold}${file}${cNormal}."
+		echo -e "\nSorry, no results found."
 
 	elif [ -n "$subdomain" ]; then
 		echo -e "\nSorry, no subdomains found for ${cBold}${target}${cNormal}."
+
+	elif [ -n "$contents" ]; then
+		echo -e "\nSorry, no results found."
+	fi
+}
+
+## Show content in files
+function showContentInFile(){
+	if [ -n "$contents" ]; then
+		echo -e "Files found containing: ${cBold}${contents}${cNormal}"
 	fi
 }
 
@@ -98,22 +107,17 @@ function ctrl_c(){
 
 ## Google ban check
 function checkBan(){
-	if [[ -z $cookies ]]; then
-	
-		checkBanStatus=$(curl -s -H "$userAgent" "${url}site:${target}${filter}${start}${pageNum}")
-	
-		if [[ ${checkBanStatus} =~ "The document has moved" ]]; then
-			echo -e "\n${cBold}[!]${cNormal} Oops... Looks like Google has temporarily blocked your IP address."
-			exit 1
-		fi
-	else
-		checkBanStatus=$(curl -s -b "${cookies}" "${urlByPass}site:${target}%2520%26filter%3D0%26start%3D${pageNum}")
+	checkBanStatus=$(curl -s -H "$userAgent" "${url}site:${target}${filter}${start}${pageNum}")
 
-		if [[ ${checkBanStatus} =~ " error " ]]; then
-			echo -e "\n${cBold}[!]${cNormal} You have exceeded the limit of requests allowed by Facebook, please try again in a few minutes."
-			exit 1
-		fi
+	if [[ ${checkBanStatus} =~ "The document has moved" ]]; then
+		echo -e "\n${cBold}[!]${cNormal} Oops... Looks like Google has temporarily blocked your IP address."
+		exit 1
 	fi
+}
+
+## URL Decode
+function urlDecode(){
+	sed 's/%3F/?/g;s/%3D/=/g;s/%20/ /g;s/%2520/ /g;s/%21/!/g;s/%23/#/g;s/%24/\$/g;s/%25/\&/g;s/%25/\&/g;s/%2B/+/g;s/%26/&/g'
 }
 
 ## Exclusions
@@ -149,6 +153,50 @@ function exclusionsCheck(){
 	fi
 }
 
+## Search the contents of files
+function contentsCheck(){
+	# Needs variables
+	inFile="infile:\""
+	
+	# Checking file exist
+	if [ -f "$contents" ]; then
+		for content in $(cat "$contents"); do
+			if [[ $multi -eq 1 ]]; then
+				content="+||+\"${content}\""
+			fi
+
+			inFile="$inFile${content}"
+			multi=1 # On multi-liner
+		done
+	elif [[ "$contents" =~ "," ]]; then
+		contentsList=$(echo "$contents" | sed 's/,/"+||+"/g')
+		inFile="$inFile${contentsList}\""
+	else 
+		inFile="$inFile${contents}\""
+	fi
+}
+
+## Search words in URL
+function inurlCheck(){
+
+	# Checking file exist
+	if [ -f "$dictionary" ]; then
+		for word in $(cat "$dictionary"); do
+			if [[ $multi -eq 1 ]]; then
+				word="+|+${word}"
+			fi
+
+			inUrl="$inUrl${word}"
+			multi=1 # On multi-liner
+		done
+	elif [[ "$dictionary" =~ "," ]]; then
+		dictionaryList=$(echo "$dictionary" | sed 's/,/+|+/g')
+		inUrl="$inUrl${dictionaryList}"
+	else 
+		inUrl="${dictionary}"
+	fi
+}
+
 ## Calculate sending requests
 function calcRequests(){
 	if [[ -z $pages ]] || [[ $pages -eq 0 ]]; then
@@ -169,31 +217,6 @@ function delayControl(){
 	fi
 }
 
-## byPass Google Captcha
-function byPass(){
-	# Checking cookie files
-	fileCookiesCheck=$(file "$cookiesFile" | cut -d ' '  -f2)
-
-	if [[ ! -f "$cookiesFile" ]]; then
-		echo -e "\n${cBold}[!]${cNormal} The file does not exist."
-		exit 1
-
-	elif [[ "$fileCookiesCheck" != "ASCII" ]]; then
-		echo -e "\n${cBold}[!]${cNormal} This file is not in text format or is corrupted."
-		exit 1
-	else
-		fileContentCookies=$(grep -a "c_user=" $cookiesFile && grep -a "xs=" $cookiesFile)
-
-		if [[ $? != 0 ]]; then
-			echo -e "\n${cBold}[!]${cNormal} The file does not contain the required Facebook cookies 'c_user' and 'xs'."
-			exit 1
-		else
-			cookies=$(cat $cookiesFile) 
-		fi
-
-	fi
-}
-
 ## Request
 function requestRun(){
 	# Reset variables
@@ -205,115 +228,59 @@ function requestRun(){
 		pages=1
 	fi
 	
-	until [[ $page -eq $pages ]]; do
+	while [ $page -lt $pages ]; do
 		let pageNum=$page*10
 
 		if [ -n "$extension" ]; then
-			if [[ -n "$cookies" ]]; then
-				excludeTargets=$(echo $excludeTargets | sed 's/\+/%2520/g')
-				request=$(curl -s -b "${cookies}" "${urlByPass}site:${target}%2520filetype:${extension}%2520${excludeTargets}%2520%26filter%3D0%26start%3D${pageNum}" | grep -Eo '\/url\?q=(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -viE "google" | cut -d '=' -f2 | sort -u | sed 's/%3F/\?/g' | sed 's/%3D/\=/g' | sed 's/%26/\&/g')
-			else
-				request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${excludeTargets}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g' | sed 's/\&amp;/\&/g')
-			fi
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}" | grep -viE "google" | grep -i "${extension}" | urlDecode | sort -u)
 
 		elif [ -n "$dictionary" ]; then
-			if [[ -n "$cookies" ]]; then
-				excludeTargets=$(echo $excludeTargets | sed 's/\+/%2520/g')
-				request=$(curl -s -b "${cookies}" "${urlByPass}site:${target}%2520inurl:${file}%2520${excludeTargets}%2520%26filter%3D0%26start%3D${pageNum}" | grep -Eo '\/url\?q=(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -viE "google" | cut -d '=' -f2 | sort -u | sed 's/%3F/\?/g' | sed 's/%3D/\=/g' | sed 's/%26/\&/g')
-			else
-				request=$(curl -s -H "$userAgent" "${url}site:${target}+inurl:${file}+${excludeTargets}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g' | sed 's/\&amp;/\&/g')
-			fi
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+${excludeTargets}+inurl:\"${inUrl}\"${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
+		
 		elif [ -n "$subdomain" ]; then
-			if [[ -n "$cookies" ]]; then
-				request=$(curl -s -b "${cookies}" "${urlByPass}site:%2A.${target}%2520-site:www.${target}%2520%26filter%3D0%26start%3D${pageNum}" | grep -Eo '\/url\?q=(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -viE "google" | cut -d '=' -f2 |  cut -d '/' -f3 | sort -u)
-			else
-				request=$(curl -s -H "$userAgent" "${url}site:*.${target}+-site:www.${target}${filter}${start}${pageNum}" | grep -oP '<a href="(.*?)"' | grep "${target}" | grep -vE "google|search\?q=site" | grep -oP '"(.*?)"' | sort -u | sed 's/"//g' | cut -d '/' -f3 | sort -u)
-			fi
+			request=$(curl -s -H "$userAgent" "${url}site:*.${target}+-site:www.${target}${filter}${start}${pageNum}" | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*${target}" | sort -u)
 
+		elif [ -n "$contents" ]; then
+			request=$(curl -s -H "$userAgent" "${url}site:${target}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
 		fi
 
+		if [ -z "$request" ]; then
+			break
+		fi
+		
 		# Request storage
-		requestStorage="$requestStorage
+		requestStorage+="
 $request"
-	
+    		
 		# Pages Incremental
 		((page++))
 
 		# Delay Control
 		delayControl
-
 	done
+
 }
 
 ## GooFuzz Dictionary Attack
 function dictionaryAttack(){
 	echo -e "\nTarget: ${cBold}${target}${cNormal}"
 
-	# Checking file exist
-	if [ -f "$dictionary" ]; then
-		
-		# Count lines
-		totalRequests=$(wc -l "${dictionary}" | awk '{printf $1}')
-		
-		# Calculate
-		calcRequests
-		
-		echo -e "Dictionary: ${cBold}${dictionary}${cNormal}"
-		echo -e "Total requests: ${totalRequests}"
-	
-		for file in $(cat "$dictionary"); do
-			# Send request
-			requestRun
-		
-			# Show information
-			if [ -n "$request" ]; then
-			echo -e "\n==================================================================="				
-			echo -e "Directories/Files: ${cBold}${file}${cNormal}"
-			echo -e "==================================================================="
-			echo "$requestStorage"
-			else
-				notFound
-			fi
-		done
-		
-		# Close script
-		exit 1
-		
-	elif [[ "$dictionary" =~ "," ]]; then
-		filesList=$(echo "$dictionary" | sed 's/,/ /g')
-		
-		for file in $filesList; do
-			# Send request
-			requestRun
-				
-			# Show information
-			if [ -n "$request" ]; then
-				echo -e "\n==================================================================="
-				echo -e "Directories/Files: ${cBold}${file}${cNormal}"
-				echo -e "==================================================================="
-				echo "$requestStorage"
-			else
-				notFound
-			fi
-		done
-		
-		# Close script
-		exit 1
-			
-	else
-		# Send request
-		file="$dictionary"
-		requestRun
+	# Send request
+	requestRun
 
-		# Show information
-		if [ -n "$request" ]; then
-			echo -e "\n==================================================================="
-			echo -e "Directories/Files: ${cBold}${file}${cNormal}"
-			echo -e "==================================================================="
-			echo "$requestStorage"
-		else
-			notFound
+	# Show information
+	if [ -n "$requestStorage" ]; then
+		echo -e "\n==================================================================="
+		echo -e "Directories and files found from: ${cBold}${dictionary}${cNormal}"
+		echo -e "==================================================================="
+		echo "$requestStorage" | sort -u
+
+		# Output file
+		if [ -n "$outputFile" ]; then
+			outputFile "$requestStorage" "$outputFile"
 		fi
+	else
+		notFound
 	fi
 }
 
@@ -337,11 +304,17 @@ function extensionAttack(){
 			requestRun
 			
 			# Show information
-			if [ -n "$request" ]; then
+			if [ -n "$requestStorage" ]; then
 				echo -e "\n==================================================================="
 				echo -e "Extension: ${cBold}${extension}${cNormal}"
+				showContentInFile
 				echo -e "==================================================================="
 				echo "$requestStorage"
+
+				# Output file
+				if [ -n "$outputFile" ]; then
+					outputFile "$requestStorage" "$outputFile"
+				fi
 			else
 				notFound
 			fi
@@ -359,11 +332,17 @@ function extensionAttack(){
 			requestRun
 			
 			# Show information
-			if [ -n "$request" ]; then
+			if [ -n "$requestStorage" ]; then
 				echo -e "\n==================================================================="
 				echo -e "Extension: ${cBold}${extension}${cNormal}"
+				showContentInFile
 				echo -e "==================================================================="
 				echo "$requestStorage"
+
+				# Output file
+				if [ -n "$outputFile" ]; then
+					outputFile "$requestStorage" "$outputFile"
+				fi
 			else
 				notFound
 			fi
@@ -378,11 +357,17 @@ function extensionAttack(){
 		requestRun
 
 		# Show information
-		if [ -n "$request" ]; then
+		if [ -n "$requestStorage" ]; then
 			echo -e "\n==================================================================="
 			echo -e "Extension: ${cBold}${extension}${cNormal}"
+			showContentInFile
 			echo -e "==================================================================="
 			echo "$requestStorage"
+
+			# Output file
+			if [ -n "$outputFile" ]; then
+				outputFile "$requestStorage" "$outputFile"
+			fi
 		else
 			notFound
 		fi
@@ -397,21 +382,54 @@ function subdomainAttack(){
 	requestRun
 
 	# Show information
-	if [ -n "$request" ]; then
+	if [ -n "$requestStorage" ]; then
 		echo -e "\n==================================================================="
 		echo -e "Subdomains found:"
 		echo -e "==================================================================="
 		echo "$requestStorage" | sort -u
+
+		# Output file
+		if [ -n "$outputFile" ]; then
+			outputFile "$requestStorage" "$outputFile"
+		fi
 	else
 		notFound
 	fi
+}
+
+## GooFuzz Contents Attack
+function contentsAttack(){
+	echo -e "\nTarget: ${cBold}${target}${cNormal}"
+
+	# Send request
+	requestRun
+
+	# Show information
+	if [ -n "$requestStorage" ]; then
+		echo -e "\n==================================================================="
+		echo -e "Files found containing: ${contents}"
+		echo -e "==================================================================="
+		echo "$requestStorage" | sort -u
+
+		# Output file
+		if [ -n "$outputFile" ]; then
+			outputFile "$requestStorage" "$outputFile"
+		fi
+	else
+		notFound
+	fi
+}
+
+## Output
+function outputFile() {
+	echo "$requestStorage" >> $outputFile
 }
 
 # Script execute
 
 ## Options
 
-while getopts :p:x:d:b:w:e:t:sh option; do
+while getopts :p:x:c:d:w:e:o:t:sh option; do
 	case ${option} in
 		h)
 			showFullBanner
@@ -428,23 +446,27 @@ while getopts :p:x:d:b:w:e:t:sh option; do
 			exclusions=${OPTARG}
 			exclusionsCheck
 		;;
+		c)
+			parametersCheck
+			contents=${OPTARG}
+			contentsCheck
+		;;
 		d)
 			parametersCheck
 			delay=${OPTARG}
 		;;
-		b)
-			parametersCheck
-			cookiesFile=${OPTARG}
-			# Checking byPass
-			byPass
-		;;
 		w)
 			parametersCheck
 			dictionary=${OPTARG}
+			inurlCheck
 		;;
 		e)
 			parametersCheck
 			extension=${OPTARG}
+		;;
+		o)
+			parametersCheck
+			outputFile=${OPTARG}
 		;;
 		t)
 			parametersCheck
@@ -464,16 +486,19 @@ done
 ## Continue
 showBanner
 
-if [ -n "$target" ] && [ -n "$dictionary" ] && [ -z "$subdomain" ]; then
+if [ -n "$target" ] && [ -n "$dictionary" ] && [ -z "$subdomain" ] && [ -z "$extension" ] && [ -z "$contents"]; then
 	dictionaryAttack
 	exit 1
 	
-elif [ -n "$target" ] && [ -n "$extension" ] && [ -z "$subdomain" ]; then
+elif [ -n "$target" ] && [ -n "$extension" ] && [ -z "$subdomain" ] && [ -z "$dictionary" ]; then
 	extensionAttack
 	exit 1
 
-elif [ -n "$target" ] && [ -n "$subdomain" ]; then
+elif [ -n "$target" ] && [ -n "$subdomain" ] && [ -z "$extension" ] && [ -z "$dictionary" ] &&  [ -z "$contents" ]; then
 	subdomainAttack
+	exit 1
+elif [ -n "$target" ] && [ -n "$contents" ] && [ -z "$subdomain" ] && [ -z "$dictionary" ]; then
+	contentsAttack
 	exit 1
 else
 	showError
