@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+c#!/usr/bin/env bash
 
 # Variables
 ## General
@@ -9,8 +9,10 @@ userAgent="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko
 version="1.2.2"
 
 ## Effects
-cBold=`tput bold`
-cNormal=`tput sgr0` #No color, No bold
+#cBold=`tput bold`
+#cNormal=`tput sgr0` #No color, No bold
+cBold="\e[1m"
+cNormal="\e[0m"
 
 # Functions
 ## Usage
