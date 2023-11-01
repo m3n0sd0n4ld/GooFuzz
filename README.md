@@ -38,6 +38,14 @@ $ chmod +x GooFuzz
 $ ./GooFuzz -h
 ```
 
+# Docker version:
+```
+$ git clone https://github.com/m3n0sd0n4ld/GooFuzz
+$ cd GooFuzz
+$ docker build -t goofuzz .
+$ docker run --rm -it goofuzz -h
+```
+
 # Use:
 
 ## Menu
