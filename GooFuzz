@@ -238,7 +238,7 @@ function requestRun(){
 			request=$(curl -s -H "$userAgent" "${url}site:${target}+${excludeTargets}+inurl:\"${inUrl}\"${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
 		
 		elif [ -n "$subdomain" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:*.${target}+-site:www.${target}${filter}${start}${pageNum}" | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*${target}" | sort -u)
+			request=$(curl -s -H "$userAgent" "${url}site:*.${target}+-site:www.${target}${filter}${start}${pageNum}" | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*${target}" | grep -viE "google" | sort -u)
 
 		elif [ -n "$contents" ]; then
 			request=$(curl -s -H "$userAgent" "${url}site:${target}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
