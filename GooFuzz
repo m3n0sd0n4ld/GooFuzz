@@ -15,7 +15,7 @@ cNormal="\e[0m"
 # Functions
 ## Usage
 function usage {
-       echo -e "\nUsage:
+	echo -e "\nUsage:
 	-h                                Display this help message.
 	-w <DICTIONARY>        Specify a DICTIONARY, PATHS or FILES.
 	-e <EXTENSION>           Specify comma-separated extensions.
@@ -26,9 +26,10 @@ function usage {
 	-s                 Lists subdomains of the specified domain.
 	-c <TEXT> Specify relevant content in comma-separated files.
 	-o <FILENAME>   Export the results to a file (results only).
+	-r <PROXY>             Specify an HTTP/HTTPS proxy.
 	   
 Examples:
-   	GooFuzz -t site.com -e pdf,doc,bak
+	GooFuzz -t site.com -e pdf,doc,bak
 	GooFuzz -t site.com -e pdf -p 2
 	GooFuzz -t www.site.com -e extensionslist.txt
 	GooFuzz -t www.site.com -w config.php,admin,/images/
@@ -37,8 +38,9 @@ Examples:
 	GooFuzz -t site.com -w login.html -x dev.site.com
 	GooFuzz -t site.com -w admin.html -x exclusion_list.txt
 	GooFuzz -t site.com -s -p 10 -d 5 -o GooFuzz-subdomains.txt
-	GooFuzz -t site.com -c P@ssw0rd!"
-       exit 0
+	GooFuzz -t site.com -c P@ssw0rd!
+	GooFuzz -t site.com -r http://proxy.example.com:8080"
+	exit 0
 }
 
 ## Checking parameters
@@ -251,7 +253,7 @@ function requestRun(){
 		# Request storage
 		requestStorage+="
 $request"
-    		
+		
 		# Pages Incremental
 		((page++))
 
@@ -425,11 +427,17 @@ function outputFile() {
 	echo "$requestStorage" >> $outputFile
 }
 
+## Set Proxy
+function setProxy() {
+	export http_proxy="$proxy"
+	export https_proxy="$proxy"
+}
+
 # Script execute
 
 ## Options
 
-while getopts :p:x:c:d:w:e:o:t:sh option; do
+while getopts :p:x:c:d:w:e:o:t:r:sh option; do
 	case ${option} in
 		h)
 			showFullBanner
@@ -476,6 +484,10 @@ while getopts :p:x:c:d:w:e:o:t:sh option; do
 			parametersCheck
 			subdomain=on
 		;;
+		r)
+			parametersCheck
+			proxy=${OPTARG}
+		;;
 		*)
 			showFullBanner
 			showError
@@ -485,6 +497,10 @@ done
 
 ## Continue
 showBanner
+
+if [ -n "$proxy" ]; then
+	setProxy
+fi
 
 if [ -n "$target" ] && [ -n "$dictionary" ] && [ -z "$subdomain" ] && [ -z "$extension" ] && [ -z "$contents"]; then
 	dictionaryAttack
