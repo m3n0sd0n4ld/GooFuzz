@@ -6,7 +6,7 @@ url="https://www.google.com/search?q="
 filter="&filter=0"
 start="&start="
 userAgent="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0"
-version="1.2.4"
+version="1.2.5"
 
 ## Effects
 cBold="\e[1m"
@@ -26,6 +26,7 @@ function usage {
 	-s                 Lists subdomains of the specified domain.
 	-c <TEXT> Specify relevant content in comma-separated files.
 	-o <FILENAME>   Export the results to a file (results only).
+	-r <PROXY> 		  Specify an [protocol://]host[:port] proxy.
 	   
 Examples:
    	GooFuzz -t site.com -e pdf,doc,bak
@@ -37,7 +38,8 @@ Examples:
 	GooFuzz -t site.com -w login.html -x dev.site.com
 	GooFuzz -t site.com -w admin.html -x exclusion_list.txt
 	GooFuzz -t site.com -s -p 10 -d 5 -o GooFuzz-subdomains.txt
-	GooFuzz -t site.com -c P@ssw0rd!"
+	GooFuzz -t site.com -c P@ssw0rd!
+	GooFuzz -t site.com -r http://proxy.example.com:8080"
        exit 0
 }
 
@@ -232,16 +234,16 @@ function requestRun(){
 		let pageNum=$page*10
 
 		if [ -n "$extension" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+filetype:${extension}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}" | grep -viE "google" | grep -i "${extension}" | urlDecode | sort -u)
+			request=$(curl -s -k -x "$proxy" -H "$userAgent" "${url}site:${target}+filetype:${extension}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}" | grep -viE "google" | grep -i "${extension}" | urlDecode | sort -u)
 
 		elif [ -n "$dictionary" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+${excludeTargets}+inurl:\"${inUrl}\"${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
+			request=$(curl -s -k -x "$proxy" -H "$userAgent" "${url}site:${target}+${excludeTargets}+inurl:\"${inUrl}\"${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
 		
 		elif [ -n "$subdomain" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:*.${target}+-site:www.${target}${filter}${start}${pageNum}" | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*${target}" | grep -viE "google" | sort -u)
+			request=$(curl -s -k -x "$proxy" -H "$userAgent" "${url}site:*.${target}+-site:www.${target}${filter}${start}${pageNum}" | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*${target}" | grep -viE "google" | sort -u)
 
 		elif [ -n "$contents" ]; then
-			request=$(curl -s -H "$userAgent" "${url}site:${target}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
+			request=$(curl -s -k -x "$proxy" -H "$userAgent" "${url}site:${target}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
 		fi
 
 		if [ -z "$request" ]; then
@@ -429,7 +431,7 @@ function outputFile() {
 
 ## Options
 
-while getopts :p:x:c:d:w:e:o:t:sh option; do
+while getopts :p:x:c:d:w:e:o:t:r:sh option; do
 	case ${option} in
 		h)
 			showFullBanner
@@ -475,6 +477,10 @@ while getopts :p:x:c:d:w:e:o:t:sh option; do
 		s)
 			parametersCheck
 			subdomain=on
+		;;
+		r)
+			parametersCheck
+			proxy=${OPTARG}
 		;;
 		*)
 			showFullBanner
