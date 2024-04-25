@@ -69,6 +69,7 @@ Usage:
         -s                 Lists subdomains of the specified domain.
         -c <TEXT> Specify relevant content in comma-separated files.
         -o <FILENAME>   Export the results to a file (results only).
+        -r <PROXY>        Specify an [protocol://]host[:port] proxy.
            
 Examples:
         GooFuzz -t site.com -e pdf,doc,bak
@@ -81,6 +82,7 @@ Examples:
         GooFuzz -t site.com -w admin.html -x exclusion_list.txt
         GooFuzz -t site.com -s -p 10 -d 5 -o GooFuzz-subdomains.txt
         GooFuzz -t site.com -c P@ssw0rd!
+        GooFuzz -t site.com -r http://proxy.example.com:8080
 ```
 
 ## Lists files by extensions separated by commas.
