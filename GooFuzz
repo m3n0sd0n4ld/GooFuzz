@@ -26,7 +26,7 @@ function usage {
 	-s                 Lists subdomains of the specified domain.
 	-c <TEXT> Specify relevant content in comma-separated files.
 	-o <FILENAME>   Export the results to a file (results only).
-	-r <PROXY> 		  Specify an [protocol://]host[:port] proxy.
+	-r <PROXY>        Specify an [protocol://]host[:port] proxy.
 	   
 Examples:
    	GooFuzz -t site.com -e pdf,doc,bak
