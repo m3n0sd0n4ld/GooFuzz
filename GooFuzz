@@ -5,8 +5,8 @@
 url="https://www.google.com/search?q="
 filter="&filter=0"
 start="&start="
-userAgent="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0"
-version="1.2.5"
+userAgent="Mozilla/5.0 (PLAYSTATION 3; 1.00)"
+version="1.2.6"
 
 ## Effects
 cBold="\e[1m"
@@ -109,7 +109,7 @@ function ctrl_c(){
 
 ## Google ban check
 function checkBan(){
-	checkBanStatus=$(curl -s -H "$userAgent" "${url}site:${target}${filter}${start}${pageNum}")
+	checkBanStatus=$(curl -s -A "$userAgent" "${url}site:${target}${filter}${start}${pageNum}")
 
 	if [[ ${checkBanStatus} =~ "The document has moved" ]]; then
 		echo -e "\n${cBold}[!]${cNormal} Oops... Looks like Google has temporarily blocked your IP address."
@@ -234,16 +234,16 @@ function requestRun(){
 		let pageNum=$page*10
 
 		if [ -n "$extension" ]; then
-			request=$(curl -s -k -x "$proxy" -H "$userAgent" "${url}site:${target}+filetype:${extension}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}" | grep -viE "google" | grep -i "${extension}" | urlDecode | sort -u)
+			request=$(curl -s -k -x "$proxy" -A "$userAgent" "${url}site:${target}+filetype:${extension}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}" | grep -viE "google" | grep -i "${extension}" | urlDecode | sort -u)
 
 		elif [ -n "$dictionary" ]; then
-			request=$(curl -s -k -x "$proxy" -H "$userAgent" "${url}site:${target}+${excludeTargets}+inurl:\"${inUrl}\"${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
+			request=$(curl -s -k -x "$proxy" -A "$userAgent" "${url}site:${target}+${excludeTargets}+inurl:\"${inUrl}\"${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
 		
 		elif [ -n "$subdomain" ]; then
-			request=$(curl -s -k -x "$proxy" -H "$userAgent" "${url}site:*.${target}+-site:www.${target}${filter}${start}${pageNum}" | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*${target}" | grep -viE "google" | sort -u)
+			request=$(curl -s -k -x "$proxy" -A "$userAgent" "${url}site:*.${target}+-site:www.${target}${filter}${start}${pageNum}" | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*${target}" | grep -viE "google" | sort -u)
 
 		elif [ -n "$contents" ]; then
-			request=$(curl -s -k -x "$proxy" -H "$userAgent" "${url}site:${target}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
+			request=$(curl -s -k -x "$proxy" -A "$userAgent" "${url}site:${target}+${inFile}+${excludeTargets}${filter}${start}${pageNum}" | grep -Eo '(http|https)://[a-zA-Z0-9./?=_%:-]*' | grep -i "${target}/" | grep -viE "google" | urlDecode | sort -u)
 		fi
 
 		if [ -z "$request" ]; then
