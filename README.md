@@ -31,27 +31,27 @@
 **GooFuzz** is a script written in *Bash Scripting* that uses advanced Google search techniques to obtain sensitive information in files or directories without making requests to the web server.
 
 # Download and install:
-```
-$ git clone https://github.com/m3n0sd0n4ld/GooFuzz.git
-$ cd GooFuzz
-$ chmod +x GooFuzz
-$ ./GooFuzz -h
+```console
+git clone https://github.com/m3n0sd0n4ld/GooFuzz.git
+cd GooFuzz
+chmod +x GooFuzz
+./GooFuzz -h
 ```
 
 # Docker version:
-```
-$ git clone https://github.com/m3n0sd0n4ld/GooFuzz
-$ cd GooFuzz
-$ docker build -t goofuzz .
-$ docker run --rm -it goofuzz -h
+```console
+git clone https://github.com/m3n0sd0n4ld/GooFuzz
+cd GooFuzz
+docker build -t goofuzz .
+docker run --rm -it goofuzz -h
 ```
 
 # Use:
 
 ## Menu
 
-```
-> ./GooFuzz -h
+```console
+./GooFuzz -h
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *                                                       *
@@ -86,8 +86,8 @@ Examples:
 ```
 
 ## Lists files by extensions separated by commas.
-```
-> ./GooFuzz -t nasa.gov -e pdf,bak,old -d 10
+```console
+./GooFuzz -t nasa.gov -e pdf,bak,old -d 10
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *********************************************************
@@ -139,8 +139,8 @@ https://www.nasa.gov/index.html.old
 ```
 
 ## Lists files by extensions contained in a txt file.
-```
-> ./GooFuzz -t nasa.gov -e wordlists/extensions.txt -d 30
+```console
+./GooFuzz -t nasa.gov -e wordlists/extensions.txt -d 30
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *********************************************************
@@ -204,7 +204,7 @@ https://www.nasa.gov/378571main_0728NASAMeeting.txt
 https://www.nasa.gov/382774main_081209_DC_Transcript.txt
 ```
 ## List files, directories and even parameters by means of a wordlist (it is recommended to use only very small files).
-```
+```console
 ./GooFuzz -t nasa.gov -w wordlists/words-100.txt -p 3
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
@@ -252,8 +252,8 @@ https://uavsar.jpl.nasa.gov/cgi-bin/data.pl?search=9G023
 ```
 
 ## Lists directories and files by specifying paths, words or file names.
-```
-> ./GooFuzz -t nasa.gov -w /login/,password,db.html -p 3
+```console
+./GooFuzz -t nasa.gov -w /login/,password,db.html -p 3
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *********************************************************
@@ -283,8 +283,8 @@ https://www-mipl.jpl.nasa.gov/vicar/core470/html/javadoc/jpl/mipl/mdms/FileServi
 ### Example 1:
 In this example we remove the subdomain "*wiki.earthdata.nasa.gov*" from the search.
 
-```
-> ./GooFuzz -t nasa.gov -w login -p 1
+```console
+./GooFuzz -t nasa.gov -w login -p 1
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *********************************************************
@@ -317,8 +317,9 @@ https://www.earthdata.nasa.gov/sites/default/files/imported/EDL_2.jpg
 https://www.earthdata.nasa.gov/sites/default/files/imported/EDL_4.jpg
 https://www.earthdata.nasa.gov/sites/default/files/imported/EDL_5.jpg
 https://www.jpl.nasa.gov/site/NSET/accounts/login/
-                                                                                                                                         
-> ./GooFuzz -t nasa.gov -w login -p 1 -x wiki.earthdata.nasa.gov
+```
+```console                                                                                                                                         
+./GooFuzz -t nasa.gov -w login -p 1 -x wiki.earthdata.nasa.gov
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *********************************************************
@@ -353,13 +354,14 @@ https://www.earthdata.nasa.gov/sites/default/files/imported/EDL_5.jpg
 ### Example 2:
 Using the previous example, we create a file called "*exclusion_list.txt*" and insert the three subdomains to exclude, we perform the same search again, but passing the list of excluded targets.
   
-```
-> cat exclusion-list.txt
+```console
+cat exclusion-list.txt
 daac.gsfc.nasa.gov
 invention.nasa.gov
 software.nasa.gov
-                                                                                                                                         
-> ./GooFuzz -t nasa.gov -w login -p 1 -x exclusion-list.txt
+```                                                                                                                                         
+```console
+./GooFuzz -t nasa.gov -w login -p 1 -x exclusion-list.txt
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *********************************************************
@@ -386,8 +388,8 @@ https://www.sewp.nasa.gov/qrt/security/login.sa
 ## Subdomains enumeration
 The functionality to list subdomains (parameter "*-s*") and in conjunction with a number of between 10 and 20 pages (parameter "*-p*"), it is possible to obtain a large number of subdomains of the organization.
 
-```
-> ./GooFuzz -t nasa.gov -s -p 20
+```console
+./GooFuzz -t nasa.gov -s -p 20
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *********************************************************
@@ -453,8 +455,8 @@ https://www.sti.nasa.gov
 ## Files found containing enumeration
 The functionality to list files by their content (parameter "*-c*"), is very useful to identify relevant files (e.g. containing the word "*password*"), even if the word is in an image file (e.g. *.png*).
 
-```
-> ./GooFuzz -t nasa.gov -c password
+```console
+./GooFuzz -t nasa.gov -c password
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *********************************************************
@@ -493,8 +495,8 @@ https://www.nccs.nasa.gov/images/Intel_MPI_Reference_Manual.pdf
 
 Or even, search for a possible password in a pdf file:
 
-```
-> ./GooFuzz -t .com -c changeme -e pdf
+```console
+./GooFuzz -t .com -c changeme -e pdf
 *********************************************************
 * GooFuzz 1.2.2 - The Power of Google Dorks             *
 *********************************************************
